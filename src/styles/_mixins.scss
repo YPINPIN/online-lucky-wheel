@@ -1,0 +1,6 @@
+@mixin btn-disabled($bg, $color) {
+  background-color: $bg;
+  color: $color;
+  cursor: not-allowed;
+  box-shadow: none;
+}

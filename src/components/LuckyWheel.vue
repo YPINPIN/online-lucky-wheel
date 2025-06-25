@@ -26,6 +26,9 @@ const prizes = ref(
 );
 
 const canvasRef = ref(null); // 轉盤畫布
+const spinning = ref(false); // 是否正在旋轉轉盤
+const spinTime = ref(8); // 旋轉時間 (s)
+const rotation = ref(0); // 轉盤旋轉角度，初始值為 0
 
 const drawWheel = () => {
   const canvas = canvasRef.value;
@@ -124,6 +127,23 @@ const truncateText = (c, text, maxWidth) => {
   }
 };
 
+// 轉盤旋轉的函式
+const spinWheel = () => {
+  if (spinning.value) return;
+  console.log("spinWheel");
+
+  spinning.value = true;
+  // 隨機旋轉
+  const minSpins = 5; // 最小旋轉圈數
+  const randomSpin = Math.floor(Math.random() * 360) + 360 * minSpins;
+  rotation.value += randomSpin;
+
+  setTimeout(() => {
+    console.log("spinWheel done");
+    spinning.value = false;
+  }, spinTime.value * 1000);
+};
+
 onMounted(() => {
   drawWheel();
 });
@@ -131,8 +151,20 @@ onMounted(() => {
 
 <template>
   <div class="wheel-container">
-    <canvas ref="canvasRef"></canvas>
+    <canvas
+      class="wheel-canvas"
+      ref="canvasRef"
+      :style="{
+        transform: `rotate(${rotation}deg)`,
+        transition: spinning ? `transform ${spinTime}s cubic-bezier(0.4, 0, 0.2, 1)` : 'none',
+      }"
+    ></canvas>
     <div class="wheel-pointer"></div>
+    <div class="wheel-controls">
+      <button class="btn-spin" @click="spinWheel" :disabled="spinning || prizes.length === 0">
+        抽籤
+      </button>
+    </div>
   </div>
 </template>
 
@@ -150,6 +182,14 @@ $pointer-border-color: #000;
     max-width: 100%;
 
     position: relative;
+    text-align: center;
+  }
+
+  /* 轉盤樣式 */
+  &-canvas {
+    width: 100%;
+    border-radius: 50%;
+    border: $wheel-border;
   }
 
   /* 箭頭樣式 */
@@ -189,9 +229,25 @@ $pointer-border-color: #000;
   }
 }
 
-canvas {
-  width: 100%;
-  border-radius: 50%;
-  border: $wheel-border;
+.btn-spin {
+  margin-top: 20px;
+  padding: 12px 24px;
+  font-size: 18px;
+  font-weight: bold;
+  color: $base-btn-color;
+  border: none;
+  border-radius: $base-btn-border-radius;
+  background-color: $btn-spin-bg;
+  box-shadow: $btn-box-shadow-1;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $btn-spin-hover-bg;
+  }
+
+  &:disabled {
+    @include btn-disabled($base-btn-disabled-bg, $base-btn-disabled-color);
+  }
 }
 </style>
