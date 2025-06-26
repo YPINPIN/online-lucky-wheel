@@ -1,34 +1,20 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
-// 預設獎品的背景色列表，如果獎品數量超過預設顏色數量，則會使用隨機顏色
-const defaultColors = [
-  "#f44336", // 紅
-  "#ff9800", // 橘
-  "#ffd600", // 黃
-  "#4caf50", // 綠
-  "#00bcd4", // 青
-  "#2196f3", // 藍
-  "#9c27b0", // 紫
-  "#e91e63", // 粉
-  "#8bc34a", // 青綠
-  "#ffc107", // 金黃
-  "#009688", // 藍綠
-  "#3f51b5", // 靛藍
-];
+const { prizes } = defineProps({
+  prizes: {
+    type: Array,
+    required: true,
+  },
+});
 
-// 獎品列表，使用預設顏色生成獎品列表
-const prizes = ref(
-  defaultColors.slice(0, 8).map((color, index) => ({
-    name: `獎項名稱 ${index + 1}`,
-    color,
-  }))
-);
+const emit = defineEmits(["prizeSelected"]);
 
 const canvasRef = ref(null); // 轉盤畫布
 const spinning = ref(false); // 是否正在旋轉轉盤
 const spinTime = ref(8); // 旋轉時間 (s)
 const rotation = ref(0); // 轉盤旋轉角度，初始值為 0
+const prizeIndex = ref(null); // 中獎獎項索引
 
 const drawWheel = () => {
   const canvas = canvasRef.value;
@@ -63,15 +49,26 @@ const drawWheel = () => {
   ctx.fill();
 
   // 計算每個獎項的扇形角度
-  const segmentAngle = 360 / prizes.value.length;
+  const segmentAngle = 360 / prizes.length;
   // 繪製每個獎項
-  prizes.value.forEach((prize, index) => {
+  prizes.forEach((prize, index) => {
     // 調整起始角度到上方(減 90 度)
     let startAngle = index * segmentAngle - 90;
     let endAngle = (index + 1) * segmentAngle - 90;
     // 將角度轉換為弧度
     startAngle = (startAngle * Math.PI) / 180;
     endAngle = (endAngle * Math.PI) / 180;
+
+    // 如果是中獎的獎項，繪製一個亮色的扇形背景
+    if (prizeIndex.value === index) {
+      // 繪製扇形
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fillStyle = "#ffeb3b";
+      ctx.fill();
+    }
 
     // 繪製獎項本身扇形
     let w = 8; // 扇形距離 border 的寬度
@@ -132,14 +129,37 @@ const spinWheel = () => {
   if (spinning.value) return;
   console.log("spinWheel");
 
-  spinning.value = true;
-  // 隨機旋轉
-  const minSpins = 5; // 最小旋轉圈數
-  const randomSpin = Math.floor(Math.random() * 360) + 360 * minSpins;
-  rotation.value += randomSpin;
+  // 重置中獎索引
+  prizeIndex.value = null;
+  // 重新繪製輪盤，恢復初始樣式
+  drawWheel();
 
+  spinning.value = true;
+
+  const minSpins = 5; // 最小旋轉圈數
+  const randomSpin = Math.floor(Math.random() * 360) + 360 * minSpins; // 隨機旋轉角度
+
+  const segmentAngle = 360 / prizes.length; // 每個獎品的角度範圍
+  let normalizedRotation = 0;
+  let adjustedRotation = 0;
+
+  // 順時針設置旋轉角度
+  rotation.value += randomSpin;
+  // 將旋轉角度歸一化到 0-360 度範圍內
+  normalizedRotation = rotation.value % 360;
+  // 由於旋轉及獎項繪製是順時針方向，所以需要將 normalizedRotation 轉換為逆時針方向的角度來計算中獎獎品
+  adjustedRotation = 360 - normalizedRotation;
+  // 計算中獎的獎品索引
+  prizeIndex.value = Math.floor(adjustedRotation / segmentAngle);
+  console.log("Prize Index:", prizeIndex.value);
+
+  // 等待旋轉完成，並且顯示中獎獎項
   setTimeout(() => {
     console.log("spinWheel done");
+    // 重新繪製輪盤顯示中獎效果
+    drawWheel();
+    // 顯示中獎 modal
+    emit("prizeSelected", prizes[prizeIndex.value]);
     spinning.value = false;
   }, spinTime.value * 1000);
 };
@@ -230,24 +250,15 @@ $pointer-border-color: #000;
 }
 
 .btn-spin {
+  @include btn-base;
   margin-top: 20px;
-  padding: 12px 24px;
-  font-size: 18px;
-  font-weight: bold;
-  color: $base-btn-color;
-  border: none;
-  border-radius: $base-btn-border-radius;
   background-color: $btn-spin-bg;
   box-shadow: $btn-box-shadow-1;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  cursor: pointer;
-
   &:hover {
     background-color: $btn-spin-hover-bg;
   }
-
   &:disabled {
-    @include btn-disabled($base-btn-disabled-bg, $base-btn-disabled-color);
+    @include btn-disabled;
   }
 }
 </style>

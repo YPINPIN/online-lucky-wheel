@@ -1,13 +1,57 @@
 <script setup>
+import { ref } from "vue";
 import AppHeader from "@/components/AppHeader.vue";
 import LuckyWheel from "@/components/LuckyWheel.vue";
+import PrizeModal from "@/components/PrizeModal.vue";
+
+// 預設獎品的背景色列表，如果獎品數量超過預設顏色數量，則會使用隨機顏色
+const defaultColors = [
+  "#f44336", // 紅
+  "#ff9800", // 橘
+  "#ffd600", // 黃
+  "#4caf50", // 綠
+  "#00bcd4", // 青
+  "#2196f3", // 藍
+  "#9c27b0", // 紫
+  "#e91e63", // 粉
+  "#8bc34a", // 青綠
+  "#ffc107", // 金黃
+  "#009688", // 藍綠
+  "#3f51b5", // 靛藍
+];
+
+// 獎品列表，使用預設顏色生成獎品列表
+const prizes = ref(
+  defaultColors.slice(0, 8).map((color, index) => ({
+    name: `獎項名稱 ${index + 1}`,
+    color,
+  }))
+);
+
+const selectedPrize = ref(null); // 中獎獎項對象
+
+// 當抽獎結束時，更新中獎獎項
+const onPrizeSelected = (prize) => {
+  selectedPrize.value = prize;
+};
+
+// 重置中獎獎項
+const resetSelectedPrize = () => {
+  console.log("resetSelectedPrize");
+  selectedPrize.value = null; // 重置中獎獎項
+};
 </script>
 
 <template>
   <div class="app-container">
     <AppHeader />
     <main class="wheel-wrapper">
-      <LuckyWheel />
+      <LuckyWheel :prizes="prizes" @prize-selected="onPrizeSelected" />
+      <PrizeModal
+        v-if="selectedPrize"
+        :selected-prize="selectedPrize"
+        @modal-close="resetSelectedPrize"
+      />
     </main>
   </div>
 </template>
@@ -33,6 +77,8 @@ body {
   width: 90%;
   margin: 0 auto;
   padding: 20px 0;
+  // 避免轉盤旋轉超出畫面出現滾動條
+  overflow: hidden;
 
   // 將子元素置中
   display: flex;

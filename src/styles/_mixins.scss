@@ -1,6 +1,35 @@
-@mixin btn-disabled($bg, $color) {
-  background-color: $bg;
-  color: $color;
+$base-btn-color: #fff;
+$base-btn-border-radius: 8px;
+$base-btn-disabled-bg: #ccc;
+$base-btn-disabled-color: #9e9e9e;
+
+@mixin btn-base {
+  padding: 12px 24px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  color: $base-btn-color;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  cursor: pointer;
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+@mixin btn-disabled {
+  background-color: $base-btn-disabled-bg;
+  color: $base-btn-disabled-color;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+@mixin prize-color-style($size, $border-width) {
+  width: $size;
+  height: $size;
+  display: inline-block;
+  border-radius: 50%;
+  border: $border-width solid #ccc;
+  flex-shrink: 0;
 }

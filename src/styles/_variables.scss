@@ -5,12 +5,16 @@ $body-bg: linear-gradient(135deg, #fff8e1 0%, #ffecb3 50%, #ffe082 100%);
 
 $base-background-color: #fffbe6;
 $base-border-color: #e0dab8;
-$base-btn-color: #fff;
-$base-btn-disabled-bg: #ccc;
-$base-btn-disabled-color: #9e9e9e;
-$base-btn-border-radius: 8px;
 
 $btn-box-shadow-1: 0 4px 6px rgba(0, 0, 0, 0.1);
 
 $btn-spin-bg: #6a1b9a;
 $btn-spin-hover-bg: #58117f;
+$btn-close-bg: #424242;
+$btn-close-hover-bg: #2e2e2e;
+
+$modal-mask-bg: rgba(0, 0, 0, 0.6);
+$modal-bg: #fff;
+$modal-border: 3px solid #ffa726;
+$modal-border-radius: 15px;
+$modal-box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
