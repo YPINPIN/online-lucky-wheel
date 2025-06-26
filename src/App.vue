@@ -3,6 +3,7 @@ import { ref } from "vue";
 import AppHeader from "@/components/AppHeader.vue";
 import LuckyWheel from "@/components/LuckyWheel.vue";
 import PrizeModal from "@/components/PrizeModal.vue";
+import AppFooter from "@/components/AppFooter.vue";
 
 // 預設獎品的背景色列表，如果獎品數量超過預設顏色數量，則會使用隨機顏色
 const defaultColors = [
@@ -53,6 +54,7 @@ const resetSelectedPrize = () => {
         @modal-close="resetSelectedPrize"
       />
     </main>
+    <AppFooter />
   </div>
 </template>
 
@@ -73,12 +75,20 @@ body {
   line-height: 1.5;
 }
 
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .wheel-wrapper {
   width: 90%;
   margin: 0 auto;
   padding: 20px 0;
   // 避免轉盤旋轉超出畫面出現滾動條
   overflow: hidden;
+  // main元素填滿剩餘空間
+  flex: 1;
 
   // 將子元素置中
   display: flex;
