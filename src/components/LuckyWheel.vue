@@ -15,6 +15,7 @@ const spinning = ref(false); // 是否正在旋轉轉盤
 const spinTime = ref(8); // 旋轉時間 (s)
 const rotation = ref(0); // 轉盤旋轉角度，初始值為 0
 const prizeIndex = ref(null); // 中獎獎項索引
+const rotateDirection = ref(true); // 控制旋轉方向，true 順時針旋轉，false 逆時針旋轉。
 
 const drawWheel = () => {
   const canvas = canvasRef.value;
@@ -143,12 +144,19 @@ const spinWheel = () => {
   let normalizedRotation = 0;
   let adjustedRotation = 0;
 
-  // 順時針設置旋轉角度
-  rotation.value += randomSpin;
-  // 將旋轉角度歸一化到 0-360 度範圍內
-  normalizedRotation = rotation.value % 360;
-  // 由於旋轉及獎項繪製是順時針方向，所以需要將 normalizedRotation 轉換為逆時針方向的角度來計算中獎獎品
-  adjustedRotation = 360 - normalizedRotation;
+  if (rotateDirection.value) {
+    // 順時針設置旋轉角度
+    rotation.value += randomSpin;
+    // 將旋轉角度歸一化到 0-360 度範圍內
+    normalizedRotation = rotation.value % 360;
+    // 由於旋轉及獎項繪製是順時針方向，所以需要將 normalizedRotation 轉換為逆時針方向的角度來計算中獎獎品
+    adjustedRotation = 360 - normalizedRotation;
+  } else {
+    // 逆時針設置旋轉角度
+    rotation.value -= randomSpin;
+    // 將旋轉角度歸一化到 0-360 度範圍內
+    adjustedRotation = Math.abs(rotation.value % 360);
+  }
   // 計算中獎的獎品索引
   prizeIndex.value = Math.floor(adjustedRotation / segmentAngle);
   console.log("Prize Index:", prizeIndex.value);
@@ -162,6 +170,20 @@ const spinWheel = () => {
     emit("prizeSelected", prizes[prizeIndex.value]);
     spinning.value = false;
   }, spinTime.value * 1000);
+};
+
+// 改變旋轉方向
+const changeDirection = () => {
+  rotateDirection.value = !rotateDirection.value;
+
+  // 如果旋轉角度不為 0，重置旋轉角度
+  if (rotation.value !== 0) {
+    rotation.value = 0;
+    // 重置中獎索引
+    prizeIndex.value = null;
+    // 重新繪製輪盤，恢復初始樣式
+    drawWheel();
+  }
 };
 
 onMounted(() => {
@@ -183,6 +205,13 @@ onMounted(() => {
     <div class="wheel-controls">
       <button class="btn-spin" @click="spinWheel" :disabled="spinning || prizes.length === 0">
         抽籤
+      </button>
+      <button
+        @click="changeDirection"
+        class="btn-direction"
+        :disabled="spinning || prizes.length === 0"
+      >
+        {{ rotateDirection ? "↻ 順" : "↺ 逆" }}
       </button>
     </div>
   </div>
@@ -259,6 +288,31 @@ $pointer-border-color: #000;
   }
   &:disabled {
     @include btn-disabled;
+  }
+}
+
+.btn-direction {
+  @include btn-base;
+  padding: 6px 12px;
+  font-size: 16px;
+  background-color: $btn-direction-bg;
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  &:hover {
+    background-color: $btn-direction-hover-bg;
+  }
+  &:disabled {
+    @include btn-disabled;
+  }
+}
+
+/* 響應式設計 */
+@media (max-width: 400px) {
+  .btn-direction {
+    padding: 4px 8px;
+    font-size: 14px;
   }
 }
 </style>
