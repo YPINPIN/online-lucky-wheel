@@ -1,12 +1,8 @@
 <script setup>
-const { selectedPrize } = defineProps({
-  selectedPrize: {
-    type: Object,
-    required: true,
-  },
-});
-
-const emit = defineEmits(["modalClose"]);
+const selectedPrize = defineModel("selectedPrize", { type: Object, required: true });
+const onBtnClose = () => {
+  selectedPrize.value = null; // 重置中獎獎項
+};
 </script>
 
 <template>
@@ -20,7 +16,7 @@ const emit = defineEmits(["modalClose"]);
           <span class="modal-popup-color" :style="{ backgroundColor: selectedPrize.color }"></span>
           <span class="modal-popup-name">{{ selectedPrize.name }}</span>
         </div>
-        <button class="modal-popup-close" @click="emit('modalClose')">關閉</button>
+        <button class="modal-popup-close" @click="onBtnClose">關閉</button>
       </div>
     </div>
   </div>

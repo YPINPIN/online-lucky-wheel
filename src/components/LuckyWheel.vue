@@ -8,7 +8,8 @@ const { prizes } = defineProps({
   },
 });
 
-const emit = defineEmits(["prizeSelected"]);
+// 中獎獎項對象，控制中獎 modal 顯示
+const selectedPrize = defineModel("selectedPrize", { required: true });
 
 const canvasRef = ref(null); // 轉盤畫布
 const spinning = ref(false); // 是否正在旋轉轉盤
@@ -167,7 +168,7 @@ const spinWheel = () => {
     // 重新繪製輪盤顯示中獎效果
     drawWheel();
     // 顯示中獎 modal
-    emit("prizeSelected", prizes[prizeIndex.value]);
+    selectedPrize.value = prizes[prizeIndex.value];
     spinning.value = false;
   }, spinTime.value * 1000);
 };
@@ -282,7 +283,7 @@ $pointer-border-color: #000;
   @include btn-base;
   margin-top: 20px;
   background-color: $btn-spin-bg;
-  box-shadow: $btn-box-shadow-1;
+  box-shadow: $box-shadow-1;
   &:hover {
     background-color: $btn-spin-hover-bg;
   }

@@ -30,29 +30,14 @@ const prizes = ref(
 );
 
 const selectedPrize = ref(null); // 中獎獎項對象
-
-// 當抽獎結束時，更新中獎獎項
-const onPrizeSelected = (prize) => {
-  selectedPrize.value = prize;
-};
-
-// 重置中獎獎項
-const resetSelectedPrize = () => {
-  console.log("resetSelectedPrize");
-  selectedPrize.value = null; // 重置中獎獎項
-};
 </script>
 
 <template>
   <div class="app-container">
     <AppHeader />
     <main class="wheel-wrapper">
-      <LuckyWheel :prizes="prizes" @prize-selected="onPrizeSelected" />
-      <PrizeModal
-        v-if="selectedPrize"
-        :selected-prize="selectedPrize"
-        @modal-close="resetSelectedPrize"
-      />
+      <LuckyWheel :prizes="prizes" v-model:selected-prize="selectedPrize" />
+      <PrizeModal v-if="selectedPrize" v-model:selected-prize="selectedPrize" />
     </main>
     <AppFooter />
   </div>
