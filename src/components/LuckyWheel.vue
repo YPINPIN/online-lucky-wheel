@@ -142,27 +142,19 @@ const spinWheel = () => {
 
   const minSpins = 5; // 最小旋轉圈數
   const randomSpin = Math.floor(Math.random() * 360) + 360 * minSpins; // 隨機旋轉角度
-
   const segmentAngle = 360 / prizes.length; // 每個獎品的角度範圍
-  let normalizedRotation = 0;
-  let adjustedRotation = 0;
 
-  if (rotateDirection.value) {
-    // 順時針設置旋轉角度
-    rotation.value += randomSpin;
-    // 將旋轉角度歸一化到 0-360 度範圍內
-    normalizedRotation = rotation.value % 360;
-    // 由於旋轉及獎項繪製是順時針方向，所以需要將 normalizedRotation 轉換為逆時針方向的角度來計算中獎獎品
-    adjustedRotation = 360 - normalizedRotation;
-  } else {
-    // 逆時針設置旋轉角度
-    rotation.value -= randomSpin;
-    // 將旋轉角度歸一化到 0-360 度範圍內
-    adjustedRotation = Math.abs(rotation.value % 360);
-  }
-  // 計算中獎的獎品索引
-  prizeIndex.value = Math.floor(adjustedRotation / segmentAngle);
-  console.log("Prize Index:", prizeIndex.value);
+  // 根據旋轉方向設置旋轉角度
+  rotation.value = rotateDirection.value
+    ? rotation.value + randomSpin
+    : rotation.value - randomSpin;
+  // 將旋轉角度歸一化到 0-360 度範圍內
+  let normalizedRotation = Math.abs(rotation.value % 360);
+  // 計算已經旋轉了幾個獎品
+  let passedSegments = Math.floor(normalizedRotation / segmentAngle);
+  // 根據旋轉方向計算中獎獎品的索引，順時針需要從最後開始計算，逆時針則等於已經旋轉了幾個獎品
+  prizeIndex.value = rotateDirection.value ? prizes.length - 1 - passedSegments : passedSegments;
+  // console.log("Prize Index:", prizeIndex.value);
 
   // 等待旋轉完成，並且顯示中獎獎項
   setTimeout(() => {
@@ -193,8 +185,8 @@ onMounted(() => {
   // 監聽獎品列表的變更
   watch(
     () => prizes,
-    (newPrizes) => {
-      console.log("Watch Prizes updated:", newPrizes);
+    () => {
+      // console.log("Watch Prizes updated:", newPrizes);
       // 當獎品列表變更時
       prizeIndex.value = null; // 重置中獎索引
       rotation.value = 0; // 重置旋轉角度
