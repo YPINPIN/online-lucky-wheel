@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { getNewPrizeColor } from "@/utils/colors.js";
 
 // 獎項列表
@@ -8,6 +8,10 @@ const prizes = defineModel("prizes", { type: Array, required: true });
 const spinning = defineModel("spinning", { type: Boolean, required: true });
 // 新增的獎項名稱
 const newPrizeName = ref("");
+// 正在編輯的獎項索引
+const editingIndex = ref(null);
+// 編輯的獎項名稱
+const editingName = ref("");
 
 /**
  * 新增獎項的函數。
@@ -33,6 +37,58 @@ const addPrize = () => {
 const deletePrize = (index) => {
   prizes.value.splice(index, 1);
 };
+
+/**
+ * 開始編輯指定索引的獎項名稱。
+ *
+ * 如果轉盤正在旋轉、有其他或同一個獎項正在編輯，
+ * 則不允許開始新的編輯。
+ *
+ * @param {number} index - 要編輯的獎項索引。
+ * @param {string} name - 當前獎項名稱。
+ */
+const startEdit = (index, name) => {
+  if (spinning.value || editingIndex.value !== null || editingIndex.value === index) {
+    return;
+  }
+  editingIndex.value = index;
+  editingName.value = name;
+};
+
+/**
+ * 儲存當前正在編輯的獎品名稱。
+ *
+ * 如果 `editingName.value` 有值，則將該名稱儲存到對應的獎品項目中，並重置編輯狀態。
+ */
+const saveEdit = () => {
+  if (editingName.value) {
+    prizes.value[editingIndex.value].name = editingName.value;
+    resetEdit();
+  }
+};
+
+/**
+ * 重置編輯狀態的函式。
+ * - 如果目前沒有正在編輯的項目則直接返回。
+ * - 將 `editingIndex.value` 設為 `null`，並清空 `editingName.value`，以結束編輯。
+ */
+const resetEdit = () => {
+  if (editingIndex.value === null) return;
+  editingIndex.value = null;
+  editingName.value = "";
+};
+
+// 自定義指令：自動聚焦
+const vFocus = {
+  mounted: (el) => el.focus(),
+};
+
+watch(spinning, () => {
+  // 如果轉盤正在旋轉中且有正在編輯的項目，結束編輯
+  if (spinning.value) {
+    resetEdit();
+  }
+});
 </script>
 
 <template>
@@ -47,6 +103,7 @@ const deletePrize = (index) => {
         placeholder="新增獎項名稱 (最多12字)"
         :disabled="spinning"
         @keyup.enter="addPrize"
+        @focus="resetEdit"
       />
       <button class="btn-add" @click="addPrize" :disabled="spinning">新增</button>
     </div>
@@ -56,12 +113,38 @@ const deletePrize = (index) => {
       </div>
       <p class="list-info">點擊獎項可以編輯獎項名稱</p>
       <ul class="list-items">
-        <li class="list-item" v-for="(prize, index) in prizes" :key="prize.name + prize.color">
+        <li
+          class="list-item"
+          v-for="(prize, index) in prizes"
+          :key="prize.name + prize.color"
+          @click="startEdit(index, prize.name)"
+          :class="{
+            editing: !spinning && index === editingIndex,
+            disabled: spinning || editingIndex !== null,
+          }"
+        >
           <span class="list-item-color" :style="{ backgroundColor: prize.color }"></span>
-          <span class="list-item-name">{{ prize.name }}</span>
-          <button class="btn btn-delete" @click.stop="deletePrize(index)" :disabled="spinning">
-            刪除
-          </button>
+          <template v-if="!spinning && editingIndex === index">
+            <input
+              class="list-item-edit"
+              type="text"
+              v-model.trim="editingName"
+              maxlength="12"
+              @keyup.enter="saveEdit"
+              v-focus
+            />
+            <button class="btn btn-edit" @click.stop="saveEdit">保存</button>
+          </template>
+          <template v-else>
+            <span class="list-item-name">{{ prize.name }}</span>
+            <button
+              class="btn btn-delete"
+              @click.stop="deletePrize(index)"
+              :disabled="spinning || editingIndex !== null"
+            >
+              刪除
+            </button>
+          </template>
         </li>
       </ul>
     </div>
@@ -157,25 +240,63 @@ const deletePrize = (index) => {
     display: flex;
     align-items: center;
     border-radius: $manager-border-radius;
-
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    &:hover {
+      background-color: $manager-item-hover-bg;
+    }
+    &.editing {
+      background-color: $manager-item-edit-bg;
+      cursor: default;
+    }
+    &.disabled {
+      background-color: $manager-item-disabled-bg;
+      cursor: not-allowed;
+    }
+    /* 獎項顏色 */
     &-color {
       @include prize-color-style(20px, 1px);
       margin-right: 8px;
     }
+    /* 獎項名稱 */
     &-name {
       flex: 1;
       font-size: 16px;
+    }
+    /* 編輯獎項 input */
+    &-edit {
+      flex: 1;
+      width: 100%;
+      margin-right: 8px;
+      padding: 4px 8px;
+      font-size: 16px;
+      border: 1px solid $btn-edit-bg;
+      border-radius: $manager-border-radius;
+      transition: box-shadow 0.3s ease;
+
+      &:focus {
+        box-shadow: 0 0 5px rgba($color: $btn-edit-bg, $alpha: 0.5);
+        outline: none;
+      }
     }
   }
 }
 
 .btn {
+  // 避免按鈕被縮小
+  flex-shrink: 0;
   @include btn-base-sm;
   box-shadow: $box-shadow-2;
   &-delete {
     background-color: $btn-delete-bg;
     &:hover {
       background-color: $btn-delete-hover-bg;
+    }
+  }
+  &-edit {
+    background-color: $btn-edit-bg;
+    &:hover {
+      background-color: $btn-edit-hover-bg;
     }
   }
 

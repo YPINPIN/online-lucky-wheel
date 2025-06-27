@@ -20,6 +20,8 @@ $btn-add-bg: #0277bd;
 $btn-add-hover-bg: #01579b;
 $btn-delete-bg: #b71c1c;
 $btn-delete-hover-bg: #7f0000;
+$btn-edit-bg: #00701a;
+$btn-edit-hover-bg: #005f17;
 
 $modal-mask-bg: rgba(0, 0, 0, 0.6);
 $modal-bg: #fff;
@@ -31,3 +33,6 @@ $manager-bg: #fffbe6;
 $manager-border: 1px solid #ddd;
 $manager-border-radius: 5px;
 $manager-list-bg: #f9f9f9;
+$manager-item-hover-bg: #f1f1f1;
+$manager-item-edit-bg: #e0e0e0;
+$manager-item-disabled-bg: transparent;
