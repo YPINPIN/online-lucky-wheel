@@ -1,25 +1,11 @@
 <script setup>
 import { ref } from "vue";
+import { defaultColors } from "@/utils/colors.js";
 import AppHeader from "@/components/AppHeader.vue";
 import LuckyWheel from "@/components/LuckyWheel.vue";
 import PrizeModal from "@/components/PrizeModal.vue";
+import PrizeManager from "@/components/PrizeManager.vue";
 import AppFooter from "@/components/AppFooter.vue";
-
-// 預設獎品的背景色列表，如果獎品數量超過預設顏色數量，則會使用隨機顏色
-const defaultColors = [
-  "#f44336", // 紅
-  "#ff9800", // 橘
-  "#ffd600", // 黃
-  "#4caf50", // 綠
-  "#00bcd4", // 青
-  "#2196f3", // 藍
-  "#9c27b0", // 紫
-  "#e91e63", // 粉
-  "#8bc34a", // 青綠
-  "#ffc107", // 金黃
-  "#009688", // 藍綠
-  "#3f51b5", // 靛藍
-];
 
 // 獎品列表，使用預設顏色生成獎品列表
 const prizes = ref(
@@ -28,7 +14,7 @@ const prizes = ref(
     color,
   }))
 );
-
+const spinning = ref(false); // 是否正在旋轉轉盤
 const selectedPrize = ref(null); // 中獎獎項對象
 </script>
 
@@ -36,8 +22,13 @@ const selectedPrize = ref(null); // 中獎獎項對象
   <div class="app-container">
     <AppHeader />
     <main class="wheel-wrapper">
-      <LuckyWheel :prizes="prizes" v-model:selected-prize="selectedPrize" />
+      <LuckyWheel
+        :prizes="prizes"
+        v-model:spinning="spinning"
+        v-model:selected-prize="selectedPrize"
+      />
       <PrizeModal v-if="selectedPrize" v-model:selected-prize="selectedPrize" />
+      <PrizeManager v-model:prizes="prizes" v-model:spinning="spinning" />
     </main>
     <AppFooter />
   </div>
@@ -67,16 +58,27 @@ body {
 }
 
 .wheel-wrapper {
+  // 高度填滿剩餘空間
+  flex: 1;
   width: 90%;
   margin: 0 auto;
+  // 增加內邊距，避免指針被遮擋
   padding: 20px 0;
   // 避免轉盤旋轉超出畫面出現滾動條
   overflow: hidden;
-  // main元素填滿剩餘空間
-  flex: 1;
 
   // 將子元素置中
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+  gap: 30px;
+}
+
+/* 響應式設計 */
+@media (max-width: 850px) {
+  .wheel-wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 </style>

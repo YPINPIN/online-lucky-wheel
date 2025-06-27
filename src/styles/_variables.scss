@@ -1,5 +1,6 @@
 $font-main: "Noto Sans TC", system-ui, sans-serif;
 $font-color: #333;
+$font-color-light: #666;
 
 $body-bg: linear-gradient(135deg, #fff8e1 0%, #ffecb3 50%, #ffe082 100%);
 
@@ -7,6 +8,7 @@ $base-background-color: #fffbe6;
 $base-border-color: #e0dab8;
 
 $box-shadow-1: 0 4px 6px rgba(0, 0, 0, 0.1);
+$box-shadow-2: 0 2px 4px rgba(0, 0, 0, 0.1);
 
 $btn-spin-bg: #6a1b9a;
 $btn-spin-hover-bg: #58117f;
@@ -14,9 +16,16 @@ $btn-close-bg: #424242;
 $btn-close-hover-bg: #2e2e2e;
 $btn-direction-bg: #186081;
 $btn-direction-hover-bg: #0e4661;
+$btn-add-bg: #0277bd;
+$btn-add-hover-bg: #01579b;
 
 $modal-mask-bg: rgba(0, 0, 0, 0.6);
 $modal-bg: #fff;
 $modal-border: 3px solid #ffa726;
 $modal-border-radius: 15px;
 $modal-box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+
+$manager-bg: #fffbe6;
+$manager-border: 1px solid #ddd;
+$manager-border-radius: 5px;
+$manager-list-bg: #f9f9f9;

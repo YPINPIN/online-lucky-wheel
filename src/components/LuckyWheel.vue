@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 
+// 獎項列表
 const { prizes } = defineProps({
   prizes: {
     type: Array,
@@ -10,9 +11,10 @@ const { prizes } = defineProps({
 
 // 中獎獎項對象，控制中獎 modal 顯示
 const selectedPrize = defineModel("selectedPrize", { required: true });
+// 是否正在旋轉轉盤
+const spinning = defineModel("spinning", { type: Boolean, required: true });
 
 const canvasRef = ref(null); // 轉盤畫布
-const spinning = ref(false); // 是否正在旋轉轉盤
 const spinTime = ref(8); // 旋轉時間 (s)
 const rotation = ref(0); // 轉盤旋轉角度，初始值為 0
 const prizeIndex = ref(null); // 中獎獎項索引
@@ -188,6 +190,20 @@ const changeDirection = () => {
 };
 
 onMounted(() => {
+  // 監聽獎品列表的變更
+  watch(
+    () => prizes,
+    (newPrizes) => {
+      console.log("Watch Prizes updated:", newPrizes);
+      // 當獎品列表變更時
+      prizeIndex.value = null; // 重置中獎索引
+      rotation.value = 0; // 重置旋轉角度
+      drawWheel(); // 重新繪製轉盤
+    },
+    { deep: true }
+  );
+
+  // 繪製轉盤
   drawWheel();
 });
 </script>
@@ -300,7 +316,6 @@ $pointer-border-color: #000;
   position: absolute;
   top: 0;
   left: 0;
-
   &:hover {
     background-color: $btn-direction-hover-bg;
   }

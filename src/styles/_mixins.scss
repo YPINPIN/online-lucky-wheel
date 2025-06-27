@@ -18,6 +18,13 @@ $base-btn-disabled-color: #9e9e9e;
   }
 }
 
+@mixin btn-base-sm {
+  @include btn-base;
+  padding: 5px 10px;
+  font-size: 14px;
+  border-radius: 5px;
+}
+
 @mixin btn-disabled {
   background-color: $base-btn-disabled-bg;
   color: $base-btn-disabled-color;
