@@ -25,6 +25,14 @@ const addPrize = () => {
     newPrizeName.value = "";
   }
 };
+
+/**
+ * 根據索引從獎品列表中移除指定獎項。
+ * @param {number} index - 要移除的獎項的索引。
+ */
+const deletePrize = (index) => {
+  prizes.value.splice(index, 1);
+};
 </script>
 
 <template>
@@ -48,9 +56,12 @@ const addPrize = () => {
       </div>
       <p class="list-info">點擊獎項可以編輯獎項名稱</p>
       <ul class="list-items">
-        <li class="list-item" v-for="prize in prizes" :key="prize.name + prize.color">
+        <li class="list-item" v-for="(prize, index) in prizes" :key="prize.name + prize.color">
           <span class="list-item-color" :style="{ backgroundColor: prize.color }"></span>
           <span class="list-item-name">{{ prize.name }}</span>
+          <button class="btn btn-delete" @click.stop="deletePrize(index)" :disabled="spinning">
+            刪除
+          </button>
         </li>
       </ul>
     </div>
@@ -141,7 +152,7 @@ const addPrize = () => {
     box-shadow: $box-shadow-2;
   }
   &-item {
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     padding: 6px 8px;
     display: flex;
     align-items: center;
@@ -155,6 +166,21 @@ const addPrize = () => {
       flex: 1;
       font-size: 16px;
     }
+  }
+}
+
+.btn {
+  @include btn-base-sm;
+  box-shadow: $box-shadow-2;
+  &-delete {
+    background-color: $btn-delete-bg;
+    &:hover {
+      background-color: $btn-delete-hover-bg;
+    }
+  }
+
+  &:disabled {
+    @include btn-disabled;
   }
 }
 
