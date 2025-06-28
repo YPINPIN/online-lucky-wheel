@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { defaultColors } from "@/utils/colors.js";
 import AppHeader from "@/components/AppHeader.vue";
 import LuckyWheel from "@/components/LuckyWheel.vue";
@@ -16,6 +16,25 @@ const prizes = ref(
 );
 const spinning = ref(false); // 是否正在旋轉轉盤
 const selectedPrize = ref(null); // 中獎獎項對象
+
+onMounted(() => {
+  // 從 localStorage 讀取已有的獎品列表
+  const stored = localStorage.getItem("prizes");
+  if (stored && stored !== "[]") {
+    prizes.value = JSON.parse(stored);
+  }
+
+  // 監聽獎品列表的變更
+  watch(
+    prizes,
+    (newPrizes) => {
+      // console.log("Watch Prizes updated and saved:", newPrizes);
+      // 將新的獎品列表存入 localStorage
+      localStorage.setItem("prizes", JSON.stringify(newPrizes));
+    },
+    { deep: true }
+  );
+});
 </script>
 
 <template>
