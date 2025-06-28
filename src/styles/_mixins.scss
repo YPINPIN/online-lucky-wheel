@@ -40,3 +40,10 @@ $base-btn-disabled-color: #9e9e9e;
   border: $border-width solid #ccc;
   flex-shrink: 0;
 }
+
+@mixin icon-svg($size: 20px, $margin-right: 5px) {
+  width: $size;
+  height: $size;
+  margin-right: $margin-right;
+  vertical-align: middle;
+}

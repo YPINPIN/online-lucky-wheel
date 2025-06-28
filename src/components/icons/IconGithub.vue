@@ -8,9 +8,6 @@
 
 <style lang="scss" scoped>
 svg {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
-  vertical-align: middle;
+  @include icon-svg;
 }
 </style>

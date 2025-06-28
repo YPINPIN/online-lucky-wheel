@@ -1,6 +1,8 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { getNewPrizeColor } from "@/utils/colors.js";
+import IconList from "@/components/icons/IconList.vue";
+import IconPen from "@/components/icons/IconPen.vue";
 
 // 獎項列表
 const prizes = defineModel("prizes", { type: Array, required: true });
@@ -12,6 +14,28 @@ const newPrizeName = ref("");
 const editingIndex = ref(null);
 // 編輯的獎項名稱
 const editingName = ref("");
+// 是否為列表模式
+const isListMode = ref(true);
+
+let textareaTimer = null; // 用於節流的定時器
+let waitTime = 500; // 節流等待時間，單位為毫秒
+// 用於存儲 textarea 的內容，使用 computed 來實現雙向綁定
+const textareaContent = computed({
+  get() {
+    // 將獎項名稱轉換為以換行符分隔的字符串
+    return prizes.value.map((prize) => prize.name).join("\n");
+  },
+  set(val) {
+    if (textareaTimer) {
+      clearTimeout(textareaTimer);
+    }
+    textareaTimer = setTimeout(() => {
+      textareaTimer = null;
+      // 當 textarea 的內容改變時，更新獎項列表
+      updatePrizesFromTextarea(val);
+    }, waitTime);
+  },
+});
 
 /**
  * 新增獎項的函數。
@@ -78,6 +102,48 @@ const resetEdit = () => {
   editingName.value = "";
 };
 
+/**
+ * 切換獎項編輯區域顯示模式。
+ * - 如果當前是列表模式，則切換到文本區域模式，反之亦然。
+ * - 在切換模式前，先重置編輯狀態，確保不會有未保存的編輯狀態。
+ */
+const toggleMode = () => {
+  resetEdit();
+  isListMode.value = !isListMode.value;
+};
+
+// 根據 textarea 更新獎項列表。
+const updatePrizesFromTextarea = (textValue) => {
+  // console.log("updatePrizesFromTextarea:", textValue);
+  if (!textValue) {
+    // 如果 textarea 為空，則清空獎品列表
+    prizes.value = [];
+  } else {
+    // 將 textarea 的內容按行分割成獎品名稱
+    const names = textValue.split("\n");
+    // console.log("Parsed names:", names);
+
+    // 已使用的顏色
+    let usedColors = prizes.value.map((prize) => prize.color.toLowerCase());
+    // 根據輸入的名稱更新獎品列表
+    prizes.value = names.map((newPrizeName, index) => {
+      // 如果名稱為空，則使用預設名稱，並且限制名稱長度為 12
+      let name = !newPrizeName.trim() ? "--預設名稱--" : newPrizeName.trim().slice(0, 12);
+      let color;
+      if (prizes.value[index]) {
+        // 如果已有顏色，則使用原有顏色
+        color = prizes.value[index].color;
+      } else {
+        // 如果沒有顏色，取得新的獎項顏色
+        color = getNewPrizeColor(usedColors);
+        // 將新顏色加入已使用顏色列表
+        usedColors.push(color);
+      }
+      return { name, color };
+    });
+  }
+};
+
 // 自定義指令：自動聚焦
 const vFocus = {
   mounted: (el) => el.focus(),
@@ -110,43 +176,58 @@ watch(spinning, () => {
     <div class="list">
       <div class="list-header">
         <h3 class="list-title">獎項列表</h3>
+        <button class="btn btn-toggle" @click="toggleMode" :disabled="spinning">
+          <span v-if="isListMode"><IconPen />文本</span>
+          <span v-else><IconList />列表</span>
+        </button>
       </div>
-      <p class="list-info">點擊獎項可以編輯獎項名稱</p>
-      <ul class="list-items">
-        <li
-          class="list-item"
-          v-for="(prize, index) in prizes"
-          :key="prize.name + prize.color"
-          @click="startEdit(index, prize.name)"
-          :class="{
-            editing: !spinning && index === editingIndex,
-            disabled: spinning || editingIndex !== null,
-          }"
-        >
-          <span class="list-item-color" :style="{ backgroundColor: prize.color }"></span>
-          <template v-if="!spinning && editingIndex === index">
-            <input
-              class="list-item-edit"
-              type="text"
-              v-model.trim="editingName"
-              maxlength="12"
-              @keyup.enter="saveEdit"
-              v-focus
-            />
-            <button class="btn btn-edit" @click.stop="saveEdit">保存</button>
-          </template>
-          <template v-else>
-            <span class="list-item-name">{{ prize.name }}</span>
-            <button
-              class="btn btn-delete"
-              @click.stop="deletePrize(index)"
-              :disabled="spinning || editingIndex !== null"
-            >
-              刪除
-            </button>
-          </template>
-        </li>
-      </ul>
+      <p class="list-info">
+        {{ isListMode ? "點擊獎項可以編輯獎項名稱" : "可新增、修改、刪除文本區域中的獎項" }}
+      </p>
+      <template v-if="isListMode">
+        <ul class="list-items">
+          <li
+            class="list-item"
+            v-for="(prize, index) in prizes"
+            :key="prize.name + prize.color"
+            @click="startEdit(index, prize.name)"
+            :class="{
+              editing: !spinning && index === editingIndex,
+              disabled: spinning || editingIndex !== null,
+            }"
+          >
+            <span class="list-item-color" :style="{ backgroundColor: prize.color }"></span>
+            <template v-if="!spinning && editingIndex === index">
+              <input
+                class="list-item-edit"
+                type="text"
+                v-model.trim="editingName"
+                maxlength="12"
+                @keyup.enter="saveEdit"
+                v-focus
+              />
+              <button class="btn btn-edit" @click.stop="saveEdit">保存</button>
+            </template>
+            <template v-else>
+              <span class="list-item-name">{{ prize.name }}</span>
+              <button
+                class="btn btn-delete"
+                @click.stop="deletePrize(index)"
+                :disabled="spinning || editingIndex !== null"
+              >
+                刪除
+              </button>
+            </template>
+          </li>
+        </ul>
+      </template>
+      <template v-else>
+        <textarea
+          v-model.trim="textareaContent"
+          class="list-textarea"
+          :disabled="spinning"
+        ></textarea>
+      </template>
     </div>
   </div>
 </template>
@@ -213,6 +294,9 @@ watch(spinning, () => {
 .list {
   &-header {
     margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   &-title {
     font-size: 20px;
@@ -223,9 +307,9 @@ watch(spinning, () => {
     font-size: 14px;
     color: $font-color-light;
   }
-
+  /* 獎項列表 */
   &-items {
-    max-height: 300px;
+    height: 300px;
     overflow-y: auto;
     margin-bottom: 10px;
     padding: 10px;
@@ -280,6 +364,30 @@ watch(spinning, () => {
       }
     }
   }
+  /* 獎項文本 textarea */
+  &-textarea {
+    vertical-align: top; // 消除底部空白
+    width: 100%;
+    height: 300px;
+    resize: none;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    border: $manager-border;
+    border-radius: $manager-border-radius;
+    box-shadow: $box-shadow-2;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    &:focus {
+      border-color: $btn-edit-bg;
+      box-shadow: 0 0 5px rgba($color: $btn-edit-bg, $alpha: 0.5);
+      outline: none;
+    }
+    &:disabled {
+      background-color: $manager-textarea-disabled-bg;
+      color: $manager-textarea-disabled-color;
+      cursor: not-allowed;
+    }
+  }
 }
 
 .btn {
@@ -297,6 +405,17 @@ watch(spinning, () => {
     background-color: $btn-edit-bg;
     &:hover {
       background-color: $btn-edit-hover-bg;
+    }
+  }
+  &-toggle {
+    background-color: $btn-toggle-bg;
+    &:hover {
+      background-color: $btn-toggle-hover-bg;
+    }
+    span {
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
   }
 
