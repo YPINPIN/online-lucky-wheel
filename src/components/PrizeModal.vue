@@ -86,7 +86,7 @@ const onBtnClose = () => {
     }
 
     &-name {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: bold;
     }
 
