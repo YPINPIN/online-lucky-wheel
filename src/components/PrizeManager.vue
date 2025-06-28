@@ -1,8 +1,10 @@
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted, onUnmounted } from "vue";
 import { getNewPrizeColor } from "@/utils/colors.js";
 import IconList from "@/components/icons/IconList.vue";
 import IconPen from "@/components/icons/IconPen.vue";
+import IconGroup from "@/components/icons/IconGroup.vue";
+import presetsJson from "@/assets/presets.json";
 
 // 獎項列表
 const prizes = defineModel("prizes", { type: Array, required: true });
@@ -16,6 +18,12 @@ const editingIndex = ref(null);
 const editingName = ref("");
 // 是否為列表模式
 const isListMode = ref(true);
+// 預設獎項資料
+const presets = ref(presetsJson);
+// 範例選單開啟狀態
+const isMenuOpen = ref(false);
+// 範例選單的元素
+const managerMenu = ref(null);
 
 let textareaTimer = null; // 用於節流的定時器
 let waitTime = 500; // 節流等待時間，單位為毫秒
@@ -144,6 +152,33 @@ const updatePrizesFromTextarea = (textValue) => {
   }
 };
 
+/**
+ * 切換選單的開合狀態。
+ */
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+};
+
+/**
+ * 載入預設獎品資料。
+ */
+const loadPreset = (type) => {
+  const preset = presets.value[type];
+  if (preset) {
+    textareaContent.value = preset.items.join("\n");
+    toggleMenu();
+  }
+};
+
+/**
+ * 當點擊選單外部時，關閉選單。
+ */
+const handleClickOutside = (e) => {
+  if (managerMenu.value && !managerMenu.value.contains(e.target)) {
+    isMenuOpen.value = false;
+  }
+};
+
 // 自定義指令：自動聚焦
 const vFocus = {
   mounted: (el) => el.focus(),
@@ -155,12 +190,31 @@ watch(spinning, () => {
     resetEdit();
   }
 });
+
+onMounted(() => {
+  // 添加點擊事件監聽器以關閉選單
+  document.addEventListener("click", handleClickOutside);
+});
+onUnmounted(() => {
+  // 移除點擊事件監聽器
+  document.removeEventListener("click", handleClickOutside);
+});
 </script>
 
 <template>
   <div class="manager">
     <div class="manager-header">
       <h2 class="manager-title">獎項管理</h2>
+      <div ref="managerMenu" class="manager-menu" :class="{ open: isMenuOpen }">
+        <button class="btn btn-menu" @click="toggleMenu" :disabled="spinning">
+          <span><IconGroup />範例</span>
+        </button>
+        <div class="manager-menu-buttons">
+          <button v-for="(preset, key) in presets" :key="key" @click="loadPreset(key)">
+            {{ preset.label }}
+          </button>
+        </div>
+      </div>
     </div>
     <div class="manager-form">
       <input
@@ -245,10 +299,48 @@ watch(spinning, () => {
 
   &-header {
     margin: 10px 0 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   &-title {
     font-size: 20px;
     font-weight: bold;
+  }
+  &-menu {
+    position: relative;
+    &-buttons {
+      position: absolute;
+      top: 110%;
+      right: 0;
+      padding: 10px;
+      background-color: $manager-menu-bg;
+      border: $manager-border;
+      border-radius: $manager-border-radius;
+      box-shadow: $box-shadow-2;
+      z-index: 100;
+
+      display: none;
+      flex-wrap: wrap;
+      gap: 8px;
+      button {
+        @include btn-base-sm;
+        color: $font-color;
+        font-weight: 400;
+        border: $manager-border;
+        white-space: nowrap;
+        background-color: $btn-menu-item-bg;
+        &:hover {
+          background-color: $btn-menu-item-hover-bg;
+        }
+      }
+    }
+
+    &.open {
+      .manager-menu-buttons {
+        display: flex;
+      }
+    }
   }
 
   &-form {
@@ -407,7 +499,8 @@ watch(spinning, () => {
       background-color: $btn-edit-hover-bg;
     }
   }
-  &-toggle {
+  &-toggle,
+  &-menu {
     background-color: $btn-toggle-bg;
     &:hover {
       background-color: $btn-toggle-hover-bg;
