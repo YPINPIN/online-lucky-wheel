@@ -1,6 +1,12 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 
+import spinSound from "@/assets/sounds/spin-sound.mp3"; // 旋轉音效
+import winSound from "@/assets/sounds/win-sound.mp3"; // 中獎音效
+// 音效引用
+const spinAudio = ref(null);
+const winAudio = ref(null);
+
 // 獎項列表
 const { prizes } = defineProps({
   prizes: {
@@ -173,6 +179,9 @@ const spinWheel = () => {
 
   // 等待旋轉完成，並且顯示中獎獎項
   setTimeout(() => {
+    // 播放中獎音效
+    winAudio.value.play();
+
     // 重新繪製轉盤顯示中獎效果
     drawWheel();
     // 顯示中獎 modal
@@ -216,6 +225,8 @@ onMounted(() => {
 
 <template>
   <div class="wheel-container">
+    <audio ref="spinAudio" :src="spinSound" preload="auto"></audio>
+    <audio ref="winAudio" :src="winSound" preload="auto"></audio>
     <canvas
       class="wheel-canvas"
       ref="canvasRef"
