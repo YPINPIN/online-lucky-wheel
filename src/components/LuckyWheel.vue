@@ -154,7 +154,7 @@ const spinWheel = () => {
 
   // 隨機旋轉角度，根據獎品數量決定最小旋轉圈數
   // 獎品數量大於 5 時，最小旋轉圈數為 5；大於 3 時，最小旋轉圈數為 7；否則為 8
-  const minSpins = prizes.value.length > 5 ? 5 : prizes.value.length > 3 ? 7 : 8;
+  const minSpins = prizes.length > 5 ? 5 : prizes.length > 3 ? 7 : 8;
   const randomSpin = Math.floor(Math.random() * 360) + 360 * minSpins;
   // 每個獎品的角度範圍
   const segmentAngle = 360 / prizes.length;
