@@ -120,7 +120,9 @@ const toggleMode = () => {
   isListMode.value = !isListMode.value;
 };
 
-// 根據 textarea 更新獎項列表。
+/**
+ * 根據 textarea 更新獎項列表。
+ */
 const updatePrizesFromTextarea = (textValue) => {
   // console.log("updatePrizesFromTextarea:", textValue);
   if (!textValue) {

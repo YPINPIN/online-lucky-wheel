@@ -128,21 +128,36 @@ const truncateText = (c, text, maxWidth) => {
   }
 };
 
-// 轉盤旋轉的函式
+/**
+ * 轉盤旋轉的函式。
+ *
+ * 此函式會根據獎品數量隨機決定旋轉圈數，計算最終中獎的獎品索引，並在旋轉結束後顯示中獎結果。
+ *
+ * 流程說明：
+ * 1. 若當前正在旋轉則直接返回。
+ * 2. 重置中獎狀態並重新繪製轉盤。
+ * 3. 計算最小旋轉圈數（根據獎品數量動態調整）。
+ * 4. 隨機產生旋轉角度，並根據旋轉方向（順時針或逆時針）計算中獎獎品的索引。
+ * 5. 設定旋轉動畫結束後，顯示重新繪製轉盤顯示中獎效果。
+ *
+ * 注意：旋轉動畫持續時間為 spinTime，期間會鎖定旋轉狀態避免重複觸發。
+ */
 const spinWheel = () => {
   if (spinning.value) return;
-  console.log("spinWheel");
 
   // 重置中獎索引
   prizeIndex.value = null;
-  // 重新繪製輪盤，恢復初始樣式
+  // 重新繪製轉盤，恢復初始樣式
   drawWheel();
 
   spinning.value = true;
 
-  const minSpins = 5; // 最小旋轉圈數
-  const randomSpin = Math.floor(Math.random() * 360) + 360 * minSpins; // 隨機旋轉角度
-  const segmentAngle = 360 / prizes.length; // 每個獎品的角度範圍
+  // 隨機旋轉角度，根據獎品數量決定最小旋轉圈數
+  // 獎品數量大於 5 時，最小旋轉圈數為 5；大於 3 時，最小旋轉圈數為 7；否則為 8
+  const minSpins = prizes.value.length > 5 ? 5 : prizes.value.length > 3 ? 7 : 8;
+  const randomSpin = Math.floor(Math.random() * 360) + 360 * minSpins;
+  // 每個獎品的角度範圍
+  const segmentAngle = 360 / prizes.length;
 
   // 根據旋轉方向設置旋轉角度
   rotation.value = rotateDirection.value
@@ -158,8 +173,7 @@ const spinWheel = () => {
 
   // 等待旋轉完成，並且顯示中獎獎項
   setTimeout(() => {
-    console.log("spinWheel done");
-    // 重新繪製輪盤顯示中獎效果
+    // 重新繪製轉盤顯示中獎效果
     drawWheel();
     // 顯示中獎 modal
     selectedPrize.value = prizes[prizeIndex.value];
@@ -176,7 +190,7 @@ const changeDirection = () => {
     rotation.value = 0;
     // 重置中獎索引
     prizeIndex.value = null;
-    // 重新繪製輪盤，恢復初始樣式
+    // 重新繪製轉盤，恢復初始樣式
     drawWheel();
   }
 };
@@ -245,6 +259,7 @@ $pointer-border-color: #000;
 
   /* 轉盤樣式 */
   &-canvas {
+    vertical-align: top; // 消除底部空白
     width: 100%;
     border-radius: 50%;
     border: $wheel-border;
