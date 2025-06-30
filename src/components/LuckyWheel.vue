@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, onUnmounted } from "vue";
 
 import spinSound from "@/assets/sounds/spin-sound.mp3"; // 旋轉音效
 import winSound from "@/assets/sounds/win-sound.mp3"; // 中獎音效
@@ -190,13 +190,117 @@ const spinWheel = () => {
   }, spinTime.value * 1000);
 };
 
+// 轉盤狀態變數
+let animationFrameId = null; // 用於 requestAnimationFrame 的 ID
+let lastRotation = 0; // 追蹤最後旋轉角度
+let accumulatedRotation = 0; // 追蹤累積旋轉角度
+let lastSegmentCount = 0; // 追蹤累積經過的獎項數
+
+/**
+ * 重置轉盤相關的狀態變數。
+ *
+ * 將旋轉角度、最後旋轉角度、累積旋轉角度及經過的獎項數全部歸零，
+ * 以便重新開始轉盤操作。
+ */
+const resetRotationState = () => {
+  rotation.value = 0; // 重置轉盤旋轉角度
+  lastRotation = 0; // 重置最後旋轉角度
+  accumulatedRotation = 0; // 重置累積旋轉角度
+  lastSegmentCount = 0; // 重置累積經過的獎項數
+};
+
+/**
+ * 此函數會在轉盤旋轉時持續監聽其旋轉角度變化，並根據當前角度判斷是否進入新的獎品段。
+ * 當進入新的獎品段時，會觸發旋轉音效播放。
+ *
+ * 主要流程：
+ * 1. 若轉盤未在旋轉，則取消動畫幀並結束函數。
+ * 2. 取得轉盤當前的旋轉矩陣，計算出目前的旋轉角度（0~359度）。
+ * 3. 計算本次與上次的角度差值，並處理角度跳變（如359到0）。
+ * 4. 累加實際旋轉角度。
+ * 5. 判斷是否跨越新的獎品段若跨越新的獎品段，則播放旋轉音效。
+ * 6. 持續以 requestAnimationFrame 方式遞迴檢查旋轉狀態。
+ */
+const checkRotationAndPlaySound = () => {
+  if (!spinning.value) {
+    cancelAnimationFrame(animationFrameId);
+    return;
+  }
+
+  // 獲取當前轉盤的旋轉矩陣
+  const matrix = new DOMMatrix(getComputedStyle(canvasRef.value).transform);
+  // atan2 獲得目前的旋轉角度
+  let currentRotation = Math.round(Math.atan2(matrix.b, matrix.a) * (180 / Math.PI));
+  // 由於 atan2 返回的角度範圍是 -180 到 180 度，因此需要將其轉換到 0 到 360 度範圍
+  currentRotation = currentRotation < 0 ? currentRotation + 360 : currentRotation;
+  // console.log("Current Rotation:", currentRotation);
+
+  if (currentRotation !== lastRotation) {
+    // 計算角度差值
+    let delta = currentRotation - lastRotation;
+    // 處理角度跳變（順時針從 359 到 0 或逆時針從 0 到 359 ）
+    if (rotateDirection.value && delta < 0) delta += 360;
+    if (!rotateDirection.value && delta > 0) delta -= 360;
+    // 累加實際旋轉角度
+    accumulatedRotation += Math.abs(delta);
+    // console.log("Accumulated Rotation:", accumulatedRotation);
+
+    // 計算每個獎品段的角度
+    const segmentAngle = 360 / prizes.length;
+    // 檢查是否達到新的獎品段
+    const currentSegmentCount = Math.floor(accumulatedRotation / segmentAngle);
+    if (currentSegmentCount > lastSegmentCount) {
+      // console.log("New Segment Count:", currentSegmentCount);
+      // 播放旋轉音效
+      playSpinSound();
+      lastSegmentCount = currentSegmentCount;
+    }
+    lastRotation = currentRotation;
+  }
+
+  animationFrameId = requestAnimationFrame(checkRotationAndPlaySound);
+};
+
+let lastPlayTime = 0; // 用於節流的時間變數
+/**
+ * 控制播放旋轉音效的函數。
+ *
+ * 控制播放旋轉音效，並加入 100 毫秒的節流機制，避免音效過於頻繁地觸發。
+ */
+const playSpinSound = () => {
+  // 添加 100ms 節流
+  if (!lastPlayTime || Date.now() - lastPlayTime >= 100) {
+    spinAudio.value.currentTime = 0; // 重置音效播放時間
+    spinAudio.value.play();
+    lastPlayTime = Date.now();
+  }
+};
+
+/**
+ * 過渡動畫開始時的處理函式。
+ *
+ * 調用 checkRotationAndPlaySound() 方法以檢查元素的旋轉狀態。
+ */
+const transitionStartHandler = () => {
+  checkRotationAndPlaySound();
+};
+/**
+ * 過渡動畫結束時的處理函式。
+ *
+ * 通過 cancelAnimationFrame(animationFrameId) 取消動畫幀請求，以防止不必要的動畫執行。
+ */
+const transitionEndHandler = () => {
+  cancelAnimationFrame(animationFrameId);
+};
+
 // 改變旋轉方向
 const changeDirection = () => {
   rotateDirection.value = !rotateDirection.value;
 
-  // 如果旋轉角度不為 0，重置旋轉角度
+  // 如果旋轉角度不為 0，重置轉盤相關狀態
   if (rotation.value !== 0) {
-    rotation.value = 0;
+    // 重置轉盤狀態
+    resetRotationState();
     // 重置中獎索引
     prizeIndex.value = null;
     // 重新繪製轉盤，恢復初始樣式
@@ -212,7 +316,7 @@ onMounted(() => {
       // console.log("Watch Prizes updated:", newPrizes);
       // 當獎品列表變更時
       prizeIndex.value = null; // 重置中獎索引
-      rotation.value = 0; // 重置旋轉角度
+      resetRotationState(); // 重置轉盤狀態
       drawWheel(); // 重新繪製轉盤
     },
     { deep: true }
@@ -220,6 +324,21 @@ onMounted(() => {
 
   // 繪製轉盤
   drawWheel();
+
+  // 監聽 transition
+  const canvas = canvasRef.value;
+  if (canvas) {
+    canvas.addEventListener("transitionstart", transitionStartHandler);
+    canvas.addEventListener("transitionend", transitionEndHandler);
+  }
+});
+
+onUnmounted(() => {
+  const canvas = canvasRef.value;
+  if (canvas) {
+    transitionStartHandler && canvas.removeEventListener("transitionstart", transitionStartHandler);
+    transitionEndHandler && canvas.removeEventListener("transitionend", transitionEndHandler);
+  }
 });
 </script>
 
