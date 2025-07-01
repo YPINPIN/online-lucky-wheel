@@ -26,6 +26,15 @@ const rotation = ref(0); // 轉盤旋轉角度，初始值為 0
 const prizeIndex = ref(null); // 中獎獎項索引
 const rotateDirection = ref(true); // 控制旋轉方向，true 順時針旋轉，false 逆時針旋轉。
 
+/**
+ * 在 canvas 上繪製轉盤與獎項。
+ *
+ * 1. 設定高解析度畫布並清除畫布。
+ * 2. 繪製轉盤底色與獎項扇形。
+ * 3. 檢查中獎獎項使用亮色背景。
+ * 4. 扇形上顯示獎項名稱，過長自動截斷。
+ * 5. 中心繪製紅色圓點。
+ */
 const drawWheel = () => {
   const canvas = canvasRef.value;
   const ctx = canvas.getContext("2d");
