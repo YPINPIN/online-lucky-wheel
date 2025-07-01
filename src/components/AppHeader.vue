@@ -27,6 +27,7 @@ import IconLogo from "@/components/icons/IconLogo.vue";
     font-weight: bold;
     line-height: 1;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    padding-bottom: 2px; // 增加底部間距，讓標題與logo對齊
   }
 }
 </style>
