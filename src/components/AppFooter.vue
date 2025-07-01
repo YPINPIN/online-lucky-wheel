@@ -1,9 +1,11 @@
 <script setup>
 import IconGithub from "@/components/icons/IconGithub.vue";
+import IconLogo from "@/components/icons/IconLogo.vue";
 </script>
 
 <template>
   <header class="app-footer">
+    <IconLogo class="app-footer-logo" />
     <span>線上抽籤轉盤 © 2025 – </span>
     <a href="https://github.com/YPINPIN" target="_blank"> <IconGithub /><span>YPINPIN</span> </a>
   </header>
@@ -23,6 +25,12 @@ $footer-hover-color: #000;
   display: flex;
   justify-content: center;
   align-items: center;
+
+  &-logo {
+    width: 20px;
+    height: 20px;
+  }
+
   a {
     display: flex;
     justify-content: center;

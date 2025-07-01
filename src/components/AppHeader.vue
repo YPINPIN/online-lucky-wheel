@@ -1,5 +1,10 @@
+<script setup>
+import IconLogo from "@/components/icons/IconLogo.vue";
+</script>
+
 <template>
   <header class="app-header">
+    <IconLogo />
     <h1 class="app-title">線上抽籤轉盤</h1>
   </header>
 </template>
@@ -12,7 +17,10 @@
     background-color: $base-background-color;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
     border-bottom: 1px solid $base-border-color;
-    text-align: center;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   &-title {
     font-size: 28px;
