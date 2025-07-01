@@ -7,7 +7,9 @@ import IconLogo from "@/components/icons/IconLogo.vue";
   <header class="app-footer">
     <IconLogo class="app-footer-logo" />
     <span>線上抽籤轉盤 © 2025 – </span>
-    <a href="https://github.com/YPINPIN" target="_blank"> <IconGithub /><span>YPINPIN</span> </a>
+    <a href="https://github.com/YPINPIN/online-lucky-wheel" target="_blank">
+      <IconGithub /><span>YPINPIN</span>
+    </a>
   </header>
 </template>
 
