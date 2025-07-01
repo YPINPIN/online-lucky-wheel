@@ -373,8 +373,11 @@ onUnmounted(() => {
         class="btn-direction"
         :disabled="spinning || prizes.length === 0"
       >
-        {{ rotateDirection ? "↻ 順" : "↺ 逆" }}
+        {{ rotateDirection ? "↺" : "↻" }}
       </button>
+      <p class="wheel-controls-info">
+        {{ rotateDirection ? "切換逆時針旋轉" : "切換順時針旋轉" }}
+      </p>
     </div>
   </div>
 </template>
@@ -439,6 +442,14 @@ $pointer-border-color: #000;
       z-index: 2;
     }
   }
+
+  &-controls-info {
+    position: absolute;
+    top: -22px;
+    left: 0;
+    font-size: 14px;
+    color: $font-color-light;
+  }
 }
 
 .btn-spin {
@@ -456,7 +467,7 @@ $pointer-border-color: #000;
 
 .btn-direction {
   @include btn-base;
-  padding: 6px 12px;
+  padding: 6px 10px;
   font-size: 16px;
   background-color: $btn-direction-bg;
   position: absolute;
