@@ -11,7 +11,7 @@
 
 [💻 **線上 Demo**](https://ypinpin.github.io/online-lucky-wheel/)
 
-<img alt="screenshot" src="./screenshot.png" style="max-width: 100%;" />
+![screenshot](./screenshot.png)
 
 ---
 
@@ -37,9 +37,9 @@
 
 ---
 
-<img alt="demo-01" src="./demo-01.gif" style="max-width: 100%;" />
+![demo-01.gif](./demo-01.gif)
 
-<img alt="demo-02" src="./demo-02.gif" style="max-width: 70%;" />
+![demo-02.gif](./demo-02.gif)
 
 ---
 
