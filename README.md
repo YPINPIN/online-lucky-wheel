@@ -1,18 +1,15 @@
 # <img alt="Logo" src="https://raw.githubusercontent.com/YPINPIN/online-lucky-wheel/main/public/favicon-512.png" height="28" /> Vue 3 線上免費抽籤轉盤工具
 
-[![Node](https://img.shields.io/badge/Node.js-22.x-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![Vue](https://img.shields.io/badge/Vue-3.5.x-42b883?logo=vue.js&logoColor=white)](https://vuejs.org/)
-[![Vite](https://img.shields.io/badge/Vite-6.x-646cff?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Sass](https://img.shields.io/badge/Sass%20Embedded-1.89.x-cc6699?logo=sass&logoColor=white)](https://sass-lang.com/dart-sass)
-[![ESLint](https://img.shields.io/badge/ESLint-9.x-4b32c3?logo=eslint&logoColor=white)](https://eslint.org/)
-[![Deploy](https://img.shields.io/badge/GitHub%20Pages-deployed-2ea44f?logo=github)](https://ypinpin.github.io/online-lucky-wheel/)
+[![Vue.js](https://img.shields.io/badge/Vue.js-3.5.x-4FC08D?logo=vuedotjs&logoColor=white)](https://vuejs.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.2.x-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Sass Embedded](https://img.shields.io/badge/Sass%20Embedded-1.89.x-CC6699?logo=sass&logoColor=white)](https://sass-lang.com/dart-sass)
+[![ESLint](https://img.shields.io/badge/ESLint-9.x-4B32C3?logo=eslint&logoColor=white)](https://eslint.org/)
+[![Deploy](https://img.shields.io/badge/GitHub%20Pages-deployed-3FB950?logo=github&logoColor=white)](https://ypinpin.github.io/online-lucky-wheel/)
 [![Last Commit](https://img.shields.io/github/last-commit/YPINPIN/online-lucky-wheel)](https://github.com/YPINPIN/online-lucky-wheel/commits/main)
 
 一個基於 **Vue 3 + Vite** 的互動式線上**幸運抽籤轉盤**，支援自訂獎項、多種範本，適合用於抽獎活動、派對遊戲或任何需要隨機抽籤的場合。
 
 [💻 **線上 Demo**](https://ypinpin.github.io/online-lucky-wheel/)
-
-<!-- ![screenshot.png](./screenshot.png) -->
 
 <img alt="screenshot" src="./screenshot.png" style="max-width: 100%;" />
 
